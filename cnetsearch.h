@@ -13,7 +13,7 @@
 #include <QTimer>
 
 #define MAIN_REQUEST_URL  "http://www.xcar.com.cn/bbs/forumdisplay.php?fid=46"
-#define HOSTNAME          "http://www.xcar.com.cn"
+
 
 class CNetSearch : public QObject
 {
@@ -22,19 +22,24 @@ public:
     explicit CNetSearch(QObject *parent = nullptr);
 
     Q_INVOKABLE requestCookie();
-    Q_INVOKABLE request();
 signals:
     void startParsing(QByteArray);
+    void startParsingThread(QByteArray);
     void stopParsing();
     void startRequest();
 public slots:
     Q_INVOKABLE void replyFromRemote(QNetworkReply *reply);
+    Q_INVOKABLE void replyFromThreadAsk(QNetworkReply *reply);
+    Q_INVOKABLE void request();
+    Q_INVOKABLE void requestThread(QString url);
 private:
     QNetworkAccessManager *m_NetAccManager;
     QNetworkAccessManager *m_reqManager;
+    QNetworkAccessManager *m_reqThreadMan;
     NetworkCookieJar *m_cookies;
     CParseResult *m_parseResult;
     QThread *m_thread;
+    QThread *m_threadPic;
     int m_page;
     QTimer *timer;
 };

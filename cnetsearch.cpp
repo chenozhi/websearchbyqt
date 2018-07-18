@@ -12,18 +12,30 @@ CNetSearch::CNetSearch(QObject *parent) : QObject(parent) , m_page(1)
 {
     m_NetAccManager = new QNetworkAccessManager(this);
     m_reqManager = new QNetworkAccessManager(this);
+    m_reqThreadMan = new QNetworkAccessManager(this);
     m_parseResult = new CParseResult();
     m_cookies = new NetworkCookieJar();
     m_thread = new QThread();
+    m_threadPic = new QThread();
 
-    m_parseResult->moveToThread(m_thread);
 
     connect(m_reqManager,SIGNAL(finished(QNetworkReply*)),this,SLOT(replyFromRemote(QNetworkReply*)));
+    connect(m_reqThreadMan,SIGNAL(finished(QNetworkReply*)),this,SLOT(replyFromThreadAsk(QNetworkReply*)));
     connect(this,SIGNAL(startParsing(QByteArray)),m_parseResult,SLOT(doParseWork(QByteArray)));
     connect(this,SIGNAL(stopParsing()),m_parseResult,SLOT(doGetReuslt()));
+     connect(m_parseResult,SIGNAL(enterIntoThread(QString)),this,SLOT(requestThread(QString)));
     connect(m_parseResult,SIGNAL(parseFinished()),this,SLOT(request()));
+    connect(this,SIGNAL(startParsingThread(QByteArray)),m_parseResult,SLOT(doThreadParse(QByteArray)));
 }
 
+void CNetSearch::replyFromThreadAsk(QNetworkReply *reply)
+{
+    QByteArray ba = reply->readAll();
+
+   // QTextCodec *codec = QTextCodec::codecForName("GBK");
+   // QString response = codec->toUnicode(ba.data());
+    emit startParsingThread(ba);
+}
 void CNetSearch::replyFromRemote(QNetworkReply *reply)
 {
     QByteArray ba = reply->readAll();
@@ -49,7 +61,7 @@ void CNetSearch::replyFromRemote(QNetworkReply *reply)
     if(!m_thread->isRunning())
         m_thread->start();
 
-    if(m_page > 10){
+    if(m_page > 1){
        emit stopParsing();
    //     timer->stop();
        return;
@@ -81,7 +93,24 @@ CNetSearch::requestCookie()
     //"http://www.xcar.com.cn/bbs/forumdisplay.php?fid=46&page=2"
 }
 
-CNetSearch::request()
+void CNetSearch::requestThread(QString url)
+{
+//    QVariant var;
+//    if(m_page == 2) requestCookie();
+//    var.setValue(m_cookies->getCookies());
+    QNetworkRequest request;
+//    request.setHeader(QNetworkRequest::CookieHeader,var);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"text/html");
+
+    if(m_page == 1){
+        request.setUrl(QUrl(url));
+    }else{
+        request.setUrl(QUrl(url + QString("&page=") + QString::number(m_page,10)));
+    }
+    qDebug()<<"###当前帖子的路径是: "<<request.url().toString();
+    m_reqThreadMan->get(request);
+}
+void CNetSearch::request()
 {
     QVariant var;
     if(m_page == 2) requestCookie();

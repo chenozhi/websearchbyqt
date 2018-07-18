@@ -6,35 +6,42 @@
 #include <QRegExp>
 #include <QFile>
 #include <QDatetime>
+#include <QEventLoop>
+#include <QNetworkRequest>
+#include <QDir>
+#include <D:\Qt\Qt5.9.3\5.9.3\mingw53_32\include\QtGui\qimage.h>
+#include <QBuffer>
 
+
+#define HOSTNAME          "http://www.xcar.com.cn"
 
 CParseResult::CParseResult(QObject *parent) : QObject(parent)
 {
     m_InfoMap.clear();
     m_countHash.clear();
-
-
+    //m_NetSearch = new CNetSearch();
+    m_pd = new PicDownloader();
     QSqlDatabase database = QSqlDatabase::addDatabase("QSQLITE");
-       database.setHostName("acidalia");
-       database.setDatabaseName("mydatabase1.db");
-       database.setUserName("mojito");
-       database.setPassword("J0a1m8");
-       bool ok = database.open();
-       qDebug() << ok;
+    database.setHostName("acidalia");
+    database.setDatabaseName("xcarinfo.db");
+    database.setUserName("mojito");
+    database.setPassword("J0a1m8");
+    bool ok = database.open();
+    qDebug() << ok;
 
 
-     QSqlQuery  query(database);
-     sql_query = query;
-    QString create_sql = "create table userinfo (username varchar(40), total int,click int,reply int)";
-    sql_query.prepare(create_sql);
-    if(!sql_query.exec())
-    {
-        qDebug() << "Error: Fail to create table." << sql_query.lastError();
-    }
-    else
-    {
-        qDebug() << "Table created!";
-    }
+    //    QSqlQuery  query(database);
+    //    sql_query = query;
+    //    QString create_sql = "create table userinfo (username varchar(40), title varchar(80),time varchar(20))";
+    //    sql_query.prepare(create_sql);
+    //    if(!sql_query.exec())
+    //    {
+    //        qDebug() << "Error: Fail to create table." << sql_query.lastError();
+    //    }
+    //    else
+    //    {
+    //        qDebug() << "Table created!";
+    //    }
 
 
 }
@@ -45,7 +52,7 @@ void CParseResult::doGetReuslt()
 }
 void CParseResult::doParseWork(QByteArray ba)
 {
-   // qDebug()<<"###local thread id = "<<QThread::currentThreadId();
+    // qDebug()<<"###local thread id = "<<QThread::currentThreadId();
     QStringList sl;
 
     //告诉Qt这个内容以什么形式编码的
@@ -54,87 +61,70 @@ void CParseResult::doParseWork(QByteArray ba)
     stream.setCodec(codec);
     QString userName;
     QDateTime time;
-    QDateTime maxTime;
-
-    QString insert_sql = "insert into userinfo values (?, ? ,? ,?)";
+    QDateTime maxTime  = QDateTime::fromString("2018-07-16", "yyyy-MM-dd");//边界时间;
+    QString datetime;
+    QString insert_sql = "insert into userinfo values (?, ?,?)";
 
 
 
 
     QString update_sql = "update userinfo set total = :total,click = :click,reply = :reply where username = :username";
-
-    QRegExp rx("(\\d+)");
+    qDebug()<<"###ddddd";
     while(!stream.atEnd()) {
         QString line = stream.readLine();
-        if(line.contains("uid=")){
-            userName = line.split("</a>")[0].split(">")[1];
-            //没有加入过的username才第一次插入，否则就修改value值.
-            QString dateLine = stream.readLine();
-            QString datetime = dateLine.split("</span>")[0].split(">")[1];//<span class="tdate">2018-07-09</span>
-            time = QDateTime::fromString(datetime, "yyyy-MM-dd");//读取的主题时间
-            maxTime = QDateTime::fromString("2018-07-15", "yyyy-MM-dd");//边界时间
-            if( QDateTime::fromString("2018-07-09","yyyy-MM-dd") <= time && time <= maxTime ){
-                if(userName == "成都白手帕" || userName == "健康小宝" || userName == "爱卡福利专员") continue;
-                stream.readLine();
-                QString tcount = stream.readLine();
+        if(line.contains("titlink")){
+            m_title = line.split("</a>")[0].split(">")[1];
+            QString threadUrl = HOSTNAME +  line.split("href=\"")[1].split("\"")[0];
+            qDebug()<<"###帖子的连接:" <<threadUrl;
+            //threadUrl = "http://www.xcar.com.cn/bbs/viewthread.php?tid=33796702";
+            //   m_NetSearch->requestThread(threadUrl);
+            emit enterIntoThread(threadUrl);
+            QEventLoop loop;
+            connect(this,SIGNAL(parseThreadFinished()),&loop,SLOT(quit()));
+            loop.exec();
 
-                 QStringList list;
-                 int pos = 0;
-
-                 while ((pos = rx.indexIn(tcount, pos)) != -1) {
-                     list << rx.cap(1);
-                      pos += rx.matchedLength();
-                 }
-                QString replyNum = list[0];
-                QString clickNum = list[1];
-
-
-
-
-                if(m_InfoMap[userName] == 0){
-                    QPair<int,int> pair(clickNum.toInt(),replyNum.toInt());
-                    m_countHash.insert(userName,pair);
-                    m_InfoMap.insert(userName,1);
-
-                    sql_query.prepare(insert_sql);
-                    sql_query.addBindValue(userName);
-                    sql_query.addBindValue(1);
-                    sql_query.addBindValue(clickNum);
-                    sql_query.addBindValue(replyNum);
-                    if(!sql_query.exec())
-                    {
-                        qDebug() << sql_query.lastError();
-                    }
-                    else
-                    {
-                        qDebug() << "inserted OK!";
-                    }
-                }
-                else{
-                    QPair<int,int> pair(m_countHash[userName].first + clickNum.toInt(),m_countHash[userName].second + replyNum.toInt());
-                    m_countHash[userName] = pair;
-                    m_InfoMap[userName] = m_InfoMap.value(userName) + 1;
-                    if(userName == "object") qDebug() << "###查看当前： " <<m_countHash[userName].first + " -- " + clickNum.toInt();
-                    sql_query.prepare(update_sql);
-                    sql_query.bindValue(":total", m_InfoMap[userName]);
-                    sql_query.bindValue(":username", userName);
-                    sql_query.bindValue(":click", (m_countHash[userName].first) + clickNum.toInt());
-                    sql_query.bindValue(":reply", m_countHash[userName].second + replyNum.toInt());
-                    if(!sql_query.exec())
-                    {
-                        qDebug() << sql_query.lastError();
-                    }
-                    else
-                    {
-                        qDebug() << "updated OK!";
-                    }
-                }
-            }
         }
     }
     emit parseFinished();
 }
 
+void CParseResult::doThreadParse(QByteArray ba)
+{
+    QStringList sl;
+
+    //告诉Qt这个内容以什么形式编码的
+    QTextCodec *codec = QTextCodec::codecForName("GBK");
+    QTextStream stream(&ba,QIODevice::ReadWrite);
+    stream.setCodec(codec);
+    QRegExp rx("http://image.*jpg");
+    rx.setMinimal(true);//最小模式，也就是贪婪模式,尽可能多的匹配这种格式
+    //利用m_title来建立文件夹，每一次进入一个帖子，都会在上次的解析中获取一个title，在这个函数里面用是能够保证是当前帖子的title
+
+    QString fullPath = "F:/xcar/"+m_title;
+    QDir dir(fullPath);
+    if(!dir.exists())
+    {
+        dir.mkdir(fullPath);
+    }
+
+    while(!stream.atEnd()) {
+        QString line = stream.readLine();
+        if(line.contains("http://image.xcar.com.cn")){
+            QStringList list;
+            int pos = 0;
+
+            while ((pos = rx.indexIn(line, pos)) != -1) {
+                list << rx.cap();
+                pos += rx.matchedLength();
+            }
+            for(int i = 0; i<list.length();i++){
+                qDebug()<<"###图片开始了: ";
+                m_pd->downloadURL(list[i],fullPath + "/" + "picture" + QString::number(i)+ ".jpg" );
+            }
+        }
+    }
+    emit parseThreadFinished();
+}
 QMap<QString,int> & CParseResult::getPostInfomation()
 {
     return m_InfoMap;

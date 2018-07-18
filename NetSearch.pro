@@ -19,12 +19,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     cnetsearch.cpp \
     networkcookiejar.cpp \
-    cparseresult.cpp
+    cparseresult.cpp \
+    picdownloader.cpp
 
 HEADERS += \
     cnetsearch.h \
     networkcookiejar.h \
-    cparseresult.h
+    cparseresult.h \
+    picdownloader.h
 
 DISTFILES += \
     main.qml

@@ -9,6 +9,8 @@
 #include <QSqlQuery>
 #include <QHash>
 #include <QPair>
+#include <picdownloader.h>
+
 
 class CParseResult : public QObject
 {
@@ -18,13 +20,18 @@ public:
     QMap<QString,int>& getPostInfomation();
 signals:
     void parseFinished();
+    void parseThreadFinished();
+    void enterIntoThread(QString);
 public slots:
     void doParseWork(QByteArray ba);
+    void doThreadParse(QByteArray ba);
     void doGetReuslt();
 private:
     QMap<QString,int> m_InfoMap;
     QHash<QString,QPair<int,int>> m_countHash;
     QSqlQuery sql_query;
+    QString m_title;
+    PicDownloader *m_pd;
 };
 
 #endif // CPARSERESULT_H
