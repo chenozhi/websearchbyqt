@@ -49,7 +49,7 @@ void CNetSearch::replyFromRemote(QNetworkReply *reply)
     if(!m_thread->isRunning())
         m_thread->start();
 
-    if(m_page > 100){
+    if(m_page > 10){
        emit stopParsing();
    //     timer->stop();
        return;
