@@ -11,6 +11,8 @@
 #include <QDir>
 #include <D:\Qt\Qt5.9.3\5.9.3\mingw53_32\include\QtGui\qimage.h>
 #include <QBuffer>
+#include <QQuickView>
+#include <QQmlContext>
 
 
 #define HOSTNAME          "http://www.xcar.com.cn"
@@ -43,12 +45,19 @@ CParseResult::CParseResult(QObject *parent) : QObject(parent)
     //        qDebug() << "Table created!";
     //    }
 
+    //qmlRegisterType<ColorMaker>("ch.qt.ParseResult", 1, 0, "ParseResult");
+      QQuickView *view = new QQuickView;
 
+      view->rootContext()->setContextProperty("myParseResult", this);
+      view->setSource(QUrl("main.qml"));
+      view->setTitle(QStringLiteral("XCAR"));
+      view->show();
 }
 
 void CParseResult::doGetReuslt()
 {
     qDebug()<<"###现在的用户列表: "<<m_InfoMap ;
+    emit parseDone("123");
 }
 void CParseResult::doParseWork(QByteArray ba)
 {
@@ -85,7 +94,7 @@ void CParseResult::doParseWork(QByteArray ba)
 
         }
     }
-    emit parseFinished();
+    emit parsePageFinished();
 }
 
 void CParseResult::doThreadParse(QByteArray ba)

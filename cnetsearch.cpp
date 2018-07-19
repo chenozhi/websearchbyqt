@@ -24,7 +24,7 @@ CNetSearch::CNetSearch(QObject *parent) : QObject(parent) , m_page(1)
     connect(this,SIGNAL(startParsing(QByteArray)),m_parseResult,SLOT(doParseWork(QByteArray)));
     connect(this,SIGNAL(stopParsing()),m_parseResult,SLOT(doGetReuslt()));
      connect(m_parseResult,SIGNAL(enterIntoThread(QString)),this,SLOT(requestThread(QString)));
-    connect(m_parseResult,SIGNAL(parseFinished()),this,SLOT(request()));
+    connect(m_parseResult,SIGNAL(parsePageFinished()),this,SLOT(request()));
     connect(this,SIGNAL(startParsingThread(QByteArray)),m_parseResult,SLOT(doThreadParse(QByteArray)));
 }
 

@@ -19,9 +19,10 @@ public:
     explicit CParseResult(QObject *parent = nullptr);
     QMap<QString,int>& getPostInfomation();
 signals:
-    void parseFinished();
+    void parsePageFinished();
     void parseThreadFinished();
     void enterIntoThread(QString);
+	void parseDone(QString total); 
 public slots:
     void doParseWork(QByteArray ba);
     void doThreadParse(QByteArray ba);

@@ -206,6 +206,7 @@ Makefile: NetSearch.pro D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/win32-g++/qmake.c
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/qt.prf \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/resources.prf \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/moc.prf \
+		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/win32/opengl.prf \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/qmake_use.prf \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/file_copies.prf \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/testcase_targets.prf \
@@ -213,8 +214,11 @@ Makefile: NetSearch.pro D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/win32-g++/qmake.c
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/yacc.prf \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/lex.prf \
 		NetSearch.pro \
+		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Quick.prl \
+		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Qml.prl \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Network.prl \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Sql.prl \
+		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Gui.prl \
 		D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Core.prl
 	$(QMAKE) -o Makefile NetSearch.pro -spec win32-g++
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/spec_pre.prf:
@@ -362,6 +366,7 @@ D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/warn_on.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/qt.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/resources.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/moc.prf:
+D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/win32/opengl.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/qmake_use.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/file_copies.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/testcase_targets.prf:
@@ -369,8 +374,11 @@ D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/exceptions.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/yacc.prf:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/mkspecs/features/lex.prf:
 NetSearch.pro:
+D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Quick.prl:
+D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Qml.prl:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Network.prl:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Sql.prl:
+D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Gui.prl:
 D:/Qt/Qt5.9.3/5.9.3/mingw53_32/lib/Qt5Core.prl:
 qmake: FORCE
 	@$(QMAKE) -o Makefile NetSearch.pro -spec win32-g++
